@@ -10,6 +10,11 @@
 !.yarn/releases
 !.yarn/versions
 
+# python
+.venv/
+__pycache__/
+*.py[cod]
+
 # testing
 /coverage
 
@@ -39,3 +44,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+.vscode/
+.vercel
