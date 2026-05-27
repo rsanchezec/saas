@@ -1,20 +1,20 @@
-# IdeaGen Pro
+# MediNotes Pro
 
-IdeaGen Pro es una aplicacion SaaS que genera ideas de negocio usando inteligencia artificial. El producto esta pensado para emprendedores, builders y equipos que quieren descubrir oportunidades dentro de la economia de agentes de IA.
+MediNotes Pro es una aplicacion SaaS para profesionales de salud que convierte notas de consulta en documentacion util con ayuda de inteligencia artificial.
 
-La app combina autenticacion, suscripciones premium y generacion de contenido en tiempo real. Los usuarios pueden iniciar sesion con Clerk, acceder al producto si tienen el plan premium y recibir ideas de negocio generadas por DeepSeek mediante streaming.
+La aplicacion permite ingresar el nombre del paciente, la fecha de la consulta y las notas medicas. Luego genera una respuesta en streaming con tres secciones: resumen para el historial clinico, proximos pasos para el medico y un borrador de correo para el paciente en lenguaje claro.
 
 ## Caracteristicas
 
-- Landing page con presentacion del producto y llamada a registro.
+- Landing page enfocada en resumenes de consultas medicas.
 - Autenticacion de usuarios con Clerk.
 - Control de acceso por suscripcion usando el plan `premium_subscription`.
 - Tabla de precios integrada con Clerk Billing.
-- Generador de ideas de negocio para agentes de IA.
-- Respuestas en streaming con Server-Sent Events.
-- Renderizado de respuestas en Markdown con soporte para listas, encabezados y GitHub Flavored Markdown.
+- Formulario para notas de consulta con selector de fecha.
 - Backend en FastAPI protegido con JWT de Clerk.
 - Integracion con DeepSeek usando el SDK compatible de OpenAI.
+- Respuestas en streaming con Server-Sent Events.
+- Renderizado de resultados en Markdown.
 - Estilos con Tailwind CSS.
 
 ## Stack Tecnologico
@@ -27,6 +27,8 @@ La app combina autenticacion, suscripciones premium y generacion de contenido en
 - FastAPI
 - DeepSeek API
 - OpenAI Python SDK
+- React DatePicker
+- React Markdown
 - Server-Sent Events
 - Vercel
 
@@ -35,12 +37,12 @@ La app combina autenticacion, suscripciones premium y generacion de contenido en
 ```text
 .
 |-- api/
-|   `-- index.py          # API FastAPI que genera ideas con DeepSeek
+|   `-- index.py          # API FastAPI para resumenes de consulta con DeepSeek
 |-- pages/
-|   |-- _app.tsx          # Provider global de Clerk
+|   |-- _app.tsx          # Provider global de Clerk y estilos globales
 |   |-- _document.tsx     # Documento HTML base
-|   |-- index.tsx         # Landing page
-|   `-- product.tsx       # Vista protegida del producto
+|   |-- index.tsx         # Landing page de MediNotes Pro
+|   `-- product.tsx       # Formulario protegido para notas de consulta
 |-- public/               # Assets estaticos
 |-- styles/
 |   `-- globals.css       # Estilos globales y Markdown
@@ -76,7 +78,7 @@ Notas:
 
 - `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` y `CLERK_SECRET_KEY` son usados por Clerk en Next.js.
 - `CLERK_JWKS_URL` permite que FastAPI valide los JWT enviados desde el frontend.
-- `DEEPSEEK_API_KEY` es obligatoria para generar ideas.
+- `DEEPSEEK_API_KEY` es obligatoria para generar los resumenes.
 - `DEEPSEEK_MODEL` es opcional. Si no se define, el backend usa `deepseek-v4-flash`.
 
 ## Instalacion
@@ -163,12 +165,13 @@ Ejecuta ESLint.
 
 1. El usuario entra a la landing page.
 2. Inicia sesion con Clerk.
-3. Si tiene el plan `premium_subscription`, puede acceder al generador.
-4. El frontend solicita un JWT de Clerk.
-5. La pagina `/product` llama al endpoint `/api` enviando el token en el header `Authorization`.
-6. FastAPI valida el JWT con Clerk.
-7. El backend llama a DeepSeek y transmite la respuesta por SSE.
-8. El frontend muestra la idea generada en formato Markdown.
+3. Si tiene el plan `premium_subscription`, puede acceder al formulario.
+4. Ingresa nombre del paciente, fecha de consulta y notas medicas.
+5. El frontend solicita un JWT de Clerk.
+6. `pages/product.tsx` envia un `POST /api` con los datos de la consulta.
+7. FastAPI valida el JWT con Clerk.
+8. El backend llama a DeepSeek y transmite la respuesta por SSE.
+9. El frontend muestra el resultado en formato Markdown.
 
 ## Configuracion De Clerk
 
@@ -183,32 +186,52 @@ Para que el acceso premium funcione correctamente, configura en Clerk:
 En `pages/product.tsx`, el componente `Show` controla el acceso:
 
 ```tsx
-<Show
-  when={{ plan: 'premium_subscription' }}
-  fallback={<SubscriptionFallback />}
->
-  <IdeaGenerator />
+<Show when={{ plan: 'premium_subscription' }} fallback={<SubscriptionFallback />}>
+  <ConsultationForm />
 </Show>
 ```
 
 ## Endpoint Principal
 
 ```http
-GET /api
+POST /api
 ```
 
 Headers requeridos:
 
 ```http
+Content-Type: application/json
 Authorization: Bearer <clerk_jwt>
+```
+
+Body:
+
+```json
+{
+  "patient_name": "Nombre del paciente",
+  "date_of_visit": "2026-05-26",
+  "notes": "Notas de la consulta medica..."
+}
 ```
 
 Respuesta:
 
 - `text/event-stream`
-- Eventos con fragmentos de texto generados por DeepSeek.
+- Eventos `data` con fragmentos del resumen generado por DeepSeek.
 - Evento `done` al finalizar.
 - Evento `app-error` si ocurre un error controlado.
+
+## Salida Esperada
+
+El modelo responde con tres secciones:
+
+```markdown
+### Resumen de la consulta para el historial del medico
+
+### Proximos pasos para el medico
+
+### Borrador de correo para el paciente en lenguaje claro
+```
 
 ## Despliegue
 
@@ -228,10 +251,11 @@ El proyecto esta preparado para desplegarse en Vercel. Para produccion:
 - No expongas `CLERK_SECRET_KEY`.
 - Valida siempre las solicitudes al backend usando JWT.
 - Manten las claves configuradas solo en variables de entorno.
+- Revisa las politicas de privacidad y cumplimiento aplicables antes de usar datos reales de pacientes.
 
 ## Estado Del Proyecto
 
-Este proyecto esta en fase inicial funcional. Actualmente incluye autenticacion, suscripcion premium, generacion de ideas por IA y streaming desde el backend.
+Este proyecto esta en fase inicial funcional. Actualmente incluye autenticacion, suscripcion premium, formulario de notas medicas, generacion de resumenes con DeepSeek y streaming desde el backend.
 
 ## Licencia
 

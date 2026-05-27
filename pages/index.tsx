@@ -3,32 +3,52 @@
 import Link from 'next/link';
 import { SignInButton, UserButton, useAuth } from '@clerk/nextjs';
 
+const features = [
+  {
+    title: 'Resúmenes profesionales',
+    description: 'Genera resúmenes claros para el historial clínico a partir de tus notas.',
+    icon: 'M',
+    accent: 'from-blue-600 to-cyan-600',
+  },
+  {
+    title: 'Próximos pasos',
+    description: 'Obtén acciones de seguimiento concretas para cada consulta.',
+    icon: 'S',
+    accent: 'from-emerald-600 to-green-600',
+  },
+  {
+    title: 'Correos al paciente',
+    description: 'Redacta comunicaciones simples y comprensibles para tus pacientes.',
+    icon: '@',
+    accent: 'from-indigo-600 to-violet-600',
+  },
+];
+
 export default function Home() {
   const { isLoaded, isSignedIn } = useAuth();
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
+    <main className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
       <div className="container mx-auto px-4 py-12">
-        {/* Navigation */}
-        <nav className="flex justify-between items-center mb-12">
+        <nav className="mb-12 flex items-center justify-between">
           <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-200">
-            IdeaGen Pro
+            MediNotes Pro
           </h1>
           <div>
             {isLoaded && !isSignedIn && (
               <SignInButton mode="modal">
-                <button className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg transition-colors">
-                  Sign In
+                <button className="rounded-lg bg-blue-600 px-6 py-2 font-medium text-white transition-colors hover:bg-blue-700">
+                  Iniciar sesión
                 </button>
               </SignInButton>
             )}
             {isLoaded && isSignedIn && (
               <div className="flex items-center gap-4">
-                <Link 
-                  href="/product" 
-                  className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg transition-colors"
+                <Link
+                  href="/product"
+                  className="rounded-lg bg-blue-600 px-6 py-2 font-medium text-white transition-colors hover:bg-blue-700"
                 >
-                  Go to App
+                  Ir a la app
                 </Link>
                 <UserButton showName />
               </div>
@@ -36,44 +56,50 @@ export default function Home() {
           </div>
         </nav>
 
-        {/* Hero Section */}
-        <div className="text-center py-24">
-          <h2 className="text-6xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-6">
-            Generate Your Next
+        <section className="py-16 text-center">
+          <h2 className="mb-6 bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-5xl font-bold text-transparent sm:text-6xl">
+            Transforma tus
             <br />
-            Big Business Idea
+            notas de consulta
           </h2>
-          <p className="text-xl text-gray-600 dark:text-gray-400 mb-8 max-w-2xl mx-auto">
-            Harness the power of AI to discover innovative business opportunities tailored for the AI agent economy
+          <p className="mx-auto mb-12 max-w-2xl text-xl text-gray-600 dark:text-gray-400">
+            Asistente con IA para generar resúmenes profesionales, próximos pasos y correos para pacientes a partir de tus notas clínicas.
           </p>
 
-          <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-xl p-6 max-w-sm mx-auto mb-8">
-            <h3 className="text-2xl font-bold mb-2">Premium Subscription</h3>
-            <p className="text-4xl font-bold text-blue-600 mb-2">
-              $10<span className="text-lg text-gray-600">/month</span>
-            </p>
-            <ul className="text-left text-gray-600 dark:text-gray-400 mb-6">
-              <li className="mb-2">Unlimited idea generation</li>
-              <li className="mb-2">Advanced AI models</li>
-              <li className="mb-2">Priority support</li>
-            </ul>
+          <div className="mx-auto mb-12 grid max-w-4xl gap-8 md:grid-cols-3">
+            {features.map((feature) => (
+              <div key={feature.title} className="relative">
+                <div className={`absolute inset-0 rounded-xl bg-gradient-to-r ${feature.accent} opacity-20 blur transition duration-300`} />
+                <div className="relative h-full rounded-xl border border-gray-200 bg-white p-6 shadow-lg dark:border-gray-700 dark:bg-gray-800">
+                  <div className={`mx-auto mb-4 flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-r ${feature.accent} text-sm font-bold text-white`}>
+                    {feature.icon}
+                  </div>
+                  <h3 className="mb-2 text-lg font-semibold text-gray-900 dark:text-gray-100">
+                    {feature.title}
+                  </h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    {feature.description}
+                  </p>
+                </div>
+              </div>
+            ))}
           </div>
-          
+
           {isLoaded && !isSignedIn && (
             <SignInButton mode="modal">
-              <button className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-4 px-8 rounded-xl text-lg transition-all transform hover:scale-105">
-                Start Your Free Trial
+              <button className="rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-4 text-lg font-bold text-white transition-all hover:from-blue-700 hover:to-indigo-700 hover:scale-105">
+                Empezar prueba gratis
               </button>
             </SignInButton>
           )}
           {isLoaded && isSignedIn && (
             <Link href="/product">
-              <button className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-4 px-8 rounded-xl text-lg transition-all transform hover:scale-105">
-                Access Premium Features
+              <button className="rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-4 text-lg font-bold text-white transition-all hover:from-blue-700 hover:to-indigo-700 hover:scale-105">
+                Acceder a funciones premium
               </button>
             </Link>
           )}
-        </div>
+        </section>
       </div>
     </main>
   );
